@@ -1,0 +1,40 @@
+# ============================================================
+# OpenClaw Docker Compose systemd 服务文件
+#
+# 安装位置：/etc/systemd/system/openclaw.service
+#
+# 作用：
+# - 系统启动后自动拉起 Docker Compose（双保险第二层）
+# - Docker 的 restart: unless-stopped 是第一层
+# - 两层一起 = 无论发生什么，Agent 都会自动回来
+#
+# 安装命令：
+#   sudo cp openclaw.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now openclaw
+# ============================================================
+
+[Unit]
+Description=OpenClaw Docker Compose
+Requires=docker.service
+After=docker.service network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/openclaw
+
+# 启动前先清理可能残留的容器
+ExecStartPre=/usr/bin/docker compose down
+
+# 注意：不加 -d，前台运行让 systemd 正确追踪进程
+ExecStart=/usr/bin/docker compose up
+
+# 停止时优雅关闭容器
+ExecStop=/usr/bin/docker compose down
+
+# 异常退出时自动重启
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
