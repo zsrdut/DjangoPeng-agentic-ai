@@ -75,7 +75,7 @@ Agent 确认写入成功后，继续下一步。
 ```
 请把你的 AGENTS.md 文件替换为以下内容，完整覆盖：
 
-# AGENTS.md — David 工作约定与操作规程
+# AGENTS.md — Chris 工作约定与操作规程
 
 ## 关于zsr
 
