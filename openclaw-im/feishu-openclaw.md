@@ -6,6 +6,11 @@
 
 ---
 
+## 飞书官方插件使用指南
+
+
+[OpenClaw 飞书官方插件使用指南（公开版）](https://bytedance.larkoffice.com/docx/MFK7dDFLFoVlOGxWCv5cTXKmnMh)
+
 ## 一、前置检查
 
 ### 1.1 OpenClaw 版本
