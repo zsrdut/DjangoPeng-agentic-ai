@@ -209,28 +209,23 @@ code: 你复制的code
 
 ---
 
-## 7. 端到端演示录屏
+## 7. 注册 Skill
 
-这一步是在飞书对话中完成完整的 Skill 调用演示。
+### 7.1 拉取最新代码（发给龙虾）
 
-### 7.1 注册 Skill（发给龙虾）
+```
+请在 ~/projects/agentic-ai 执行 git pull，拉取 financial-automation 最新版本。
+```
+
+### 7.2 注册 Skill（发给龙虾）
 
 ```
 请把 financial-automation 的 Skill 注册到 OpenClaw：
 
 1. 将 ~/projects/agentic-ai/financial-automation/skills/financial-expense-automation 复制到 OpenClaw 的 workspace skills 目录
-2. 确保环境变量 FINANCIAL_AUTOMATION_ROOT 指向项目目录
+2. 确保环境变量 FINANCIAL_AUTOMATION_ROOT 指向 ~/projects/agentic-ai/financial-automation
 3. 确认 Skill 已被 OpenClaw 加载（/skills list 能看到 financial-expense-automation）
 ```
-
-### 7.2 演示录屏
-
-1. 开始录屏
-2. 在飞书 DM 中，直接发送一张 PDF 发票给龙虾
-3. 龙虾自动识别并调用 financial-expense-automation Skill
-4. 等待识别 → 写表 → 回读完成
-5. 切到飞书多维表格，展示新记录和附件
-6. 停止录屏
 
 ---
 
