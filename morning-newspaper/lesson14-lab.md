@@ -120,8 +120,6 @@ python scripts/collect_raw.py --skip-tavily
    - runtime/top10_ranking_input.json
    - runtime/top10_publishable.json
    - runtime/dashboard.html
-4. 执行：
-   - ./scripts/serve_dashboard_8510.sh
 
 请不要复用旧的占位结果文件，不要继续使用 [TEST] 占位摘要。
 如果 title_shortlist_result.json、draft_result.json、top10_ranking_result.json 没有为当前这一轮输入正确生成，就不要假装正式页面已经完成。
@@ -131,7 +129,6 @@ python scripts/collect_raw.py --skip-tavily
 2. runtime/dashboard.html 是否已更新
 3. scripts/check_runtime_status.py 是否通过
 4. summary_placeholders 是否为空
-5. 8510 Web 服务是否已启动
 ```
 
 > 关键判断：不要把"脚本跑成功"误当成"正式早报已经可交付"。必须确认当前这轮输入对应的 shortlist / draft / ranking 结果都已生成，并产出无占位摘要的正式页面。

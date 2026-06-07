@@ -11,7 +11,7 @@ if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
 from morning_newspaper.collectors import collect_all
-from morning_newspaper.common import load_yaml, write_json, write_text
+from morning_newspaper.common import load_env_file, load_yaml, write_json, write_text
 from morning_newspaper.models import utc_now_iso
 
 
@@ -25,6 +25,7 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
+    load_env_file(PROJECT_ROOT / ".env")
     config_path = Path(args.config)
     config = load_yaml(config_path)
     if args.skip_tavily and isinstance(config.get("openclaw_tavily"), dict):

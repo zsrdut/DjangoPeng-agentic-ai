@@ -11,7 +11,7 @@ from .github import fetch_github_high_stars
 from .hackernews import fetch_hackernews_top
 from .items import dedup_exact
 from .rss import fetch_rss
-from .tavily import read_tavily_results, write_tavily_plan
+from .tavily import execute_tavily_plan, read_tavily_results, write_tavily_plan
 
 
 def collect_all(config: Dict[str, Any], *, root: Path) -> tuple[List[RawItem], List[Dict[str, Any]]]:
@@ -34,15 +34,15 @@ def collect_all(config: Dict[str, Any], *, root: Path) -> tuple[List[RawItem], L
         runtime_dir = root / str(config.get("runtime", {}).get("output_dir", "runtime"))
         plan_path = runtime_dir / "tavily_search_plan.json"
         write_tavily_plan(tavily_cfg, plan_path)
+        results_path = runtime_dir / "tavily_search_results.json"
+        executed = execute_tavily_plan(plan_path, results_path)
         reports.append({
             "source_id": "openclaw_tavily",
             "source_type": "tavily_plan",
-            "status": "plan_written",
-            "item_count": 0,
+            "status": "plan_executed" if executed else "plan_written",
+            "item_count": executed,
             "output": str(plan_path),
         })
-
-        results_path = runtime_dir / "tavily_search_results.json"
         fetched = read_tavily_results(results_path)
         if fetched:
             fetched = _filter_recent_items(fetched, lookback_days=lookback_days)
