@@ -125,6 +125,7 @@ def main() -> None:
             })
 
     publishable.sort(key=lambda row: int(row.get("rank", 10**9)))
+    publishable = _enforce_source_diversity(publishable, items)
     generated_at = utc_now_iso()
     publishable_payload = {
         "generated_at": generated_at,
@@ -164,6 +165,88 @@ def main() -> None:
     print(f"publishable items={len(publishable)}")
     print(f"wrote {args.output}")
     print(f"wrote {args.final_output}")
+
+
+TAVILY_TYPES = {"tavily_api", "tavily_skill"}
+PROTECTED_SOURCES = ["github_high_stars", "hackernews_top"]
+# Tavily 最多占发布列表的一半；GitHub + HN 合占另一半
+TAVILY_MAX_RATIO = 0.5
+PROTECTED_MIN_EACH = 2
+
+
+def _enforce_source_diversity(
+    publishable: List[Dict[str, Any]],
+    all_drafted: List[Dict[str, Any]],
+) -> List[Dict[str, Any]]:
+    """硬性配额：Tavily ≤ 50%，GitHub + HN 各至少 2 条（如有足够候选）。"""
+    if not publishable:
+        return publishable
+
+    total = len(publishable)
+    tavily_max = max(1, int(total * TAVILY_MAX_RATIO))
+
+    # 分离 Tavily 和非 Tavily 条目
+    tavily_items = [r for r in publishable if str(r.get("source_type", "")).strip() in TAVILY_TYPES]
+    non_tavily_items = [r for r in publishable if str(r.get("source_type", "")).strip() not in TAVILY_TYPES]
+
+    # 如果 Tavily 未超限且 GitHub/HN 各已有 ≥ PROTECTED_MIN_EACH，直接返回
+    protected_counts = {}
+    for s in PROTECTED_SOURCES:
+        protected_counts[s] = sum(
+            1 for r in publishable
+            if str(r.get("source_type", "")).strip() == s
+        )
+    if len(tavily_items) <= tavily_max and all(protected_counts[s] >= PROTECTED_MIN_EACH for s in PROTECTED_SOURCES):
+        return publishable
+
+    # 砍掉超限的 Tavily（保留排名靠前的）
+    tavily_items.sort(key=lambda r: int(r.get("rank", 10**9)))
+    kept_tavily = tavily_items[:tavily_max]
+
+    # 从已成稿条目中补 GitHub/HN
+    used_urls = {str(r.get("url", "")).strip() for r in kept_tavily + non_tavily_items}
+    additions: List[Dict[str, Any]] = []
+
+    for source_type in PROTECTED_SOURCES:
+        current = sum(1 for r in non_tavily_items if str(r.get("source_type", "")).strip() == source_type)
+        need = max(0, PROTECTED_MIN_EACH - current)
+        if need == 0:
+            continue
+        pool = [
+            item for item in all_drafted
+            if isinstance(item, dict)
+            and str(item.get("source_type", "")).strip() == source_type
+            and str(item.get("url", "")).strip() not in used_urls
+        ]
+        # 优先选标题含 AI 关键词的
+        ai_pool = [
+            item for item in pool
+            if any(kw in str(item.get("title", "") or item.get("title_zh", "")).lower()
+                   for kw in ["ai", "agent", "model", "llm", "code", "research"])
+        ]
+        ordered = ai_pool + [item for item in pool if item not in ai_pool]
+        for item in ordered[:need]:
+            additions.append(item)
+            used_urls.add(str(item.get("url", "")).strip())
+
+    # 组装最终列表：非 Tavily 原有 + 补入的 GitHub/HN + 限额内的 Tavily
+    merged_raw = non_tavily_items + additions + kept_tavily
+    # 重新编号 rank
+    merged_raw.sort(key=lambda r: int(r.get("rank", 10**9)))
+    result: List[Dict[str, Any]] = []
+    for idx, row in enumerate(merged_raw, 1):
+        entry = {
+            "rank": idx,
+            "item_id": str(row.get("item_id", "")).strip(),
+            "title": str(row.get("title_zh", "")).strip() or str(row.get("title", "")).strip(),
+            "summary": str(row.get("summary_main", "") or row.get("summary", "")).strip(),
+            "published_at": str(row.get("published_at", "")).strip(),
+            "url": str(row.get("url", "")).strip(),
+            "source_name": str(row.get("source_name", "")).strip(),
+            "source_type": str(row.get("source_type", "")).strip(),
+        }
+        result.append(entry)
+    return result
 
 
 def _render_report(items: List[Dict[str, Any]]) -> str:
