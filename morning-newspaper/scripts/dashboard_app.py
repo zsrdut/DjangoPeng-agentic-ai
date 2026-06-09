@@ -1,13 +1,19 @@
 from __future__ import annotations
 
+import sys
 from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+SRC = PROJECT_ROOT / "src"
+if str(SRC) not in sys.path:
+    sys.path.insert(0, str(SRC))
 
 try:
     import streamlit as st
 except ImportError as exc:  # pragma: no cover
     raise RuntimeError("Streamlit is required. Install with: pip install streamlit") from exc
 
-from src.morning_newspaper.dashboard import build_dashboard_payload
+from morning_newspaper.dashboard import build_dashboard_payload
 
 
 PRIORITY_COLORS = {
@@ -21,8 +27,7 @@ def main() -> None:
     st.set_page_config(page_title="今日 AI 早报", layout="wide")
     _inject_css()
 
-    root = Path(__file__).resolve().parent
-    data = build_dashboard_payload(root / "runtime")
+    data = build_dashboard_payload(PROJECT_ROOT / "runtime")
     overview = data.get("overview", {})
 
     st.title(data.get("headline") or "今日 AI 早报")

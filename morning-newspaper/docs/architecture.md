@@ -105,7 +105,7 @@ apply 阶段执行来源多样性硬约束：Tavily 最多占 Top10 的 50%，Gi
 |---|---|
 | 静态页面 | `http://<IP>:8510/dashboard.html`，由 `serve_dashboard_8510.sh` 启动 |
 | 飞书日报群 | 07:58 执行回执 + 08:05 正式早报摘要 |
-| Streamlit 看板 | `dashboard_app.py`（可选，本地调试用） |
+| Streamlit 看板 | `scripts/dashboard_app.py`（可选，本地调试用） |
 
 ## 防护机制
 

@@ -164,7 +164,7 @@ IMAP_PASS=your_imap_authorization_code
 
 - 静态页面：`runtime/dashboard.html`
 - 固定分享链接：`http://<服务器IP>:8510/dashboard.html`
-- Streamlit 看板入口：`dashboard_app.py`
+- Streamlit 看板入口：`scripts/dashboard_app.py`
 
 ## 回复要求
 
